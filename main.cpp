@@ -9,14 +9,14 @@ public:
     float position[3];
     float direction[3];
     float color[3];
-}
+};
 class sphere {
     public:
         float position[3];
         float color[3];
         float smoothness;
         float radius;
-}
+};
 int main() {
     std::ofstream MyFile("output.ppm");
     MyFile << "P3" << std::endl;
