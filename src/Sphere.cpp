@@ -3,6 +3,8 @@
 
 #include <cmath>
 
+Sphere::Sphere(float radius, std::array<float, 3> position, std::array<float, 3> color, float smoothness) : radius(radius), position(position), color(color), smoothness(smoothness) {}
+
 Hit Sphere::getIntersection(Ray ray) {
     std::array<float, 3> difference = {
         ray.position[0] - position[0],

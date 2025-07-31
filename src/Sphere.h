@@ -11,6 +11,6 @@ class Sphere {
         std::array<float, 3> color;
         float smoothness;
         float radius;
-
+        Sphere(float radius, std::array<float, 3> position, std::array<float, 3> color, float smoothness);
         Hit getIntersection(Ray ray);
 };
