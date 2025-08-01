@@ -6,7 +6,7 @@
 #include<random>
 
 //constructor
-Scene::Scene(const char* filename, int width, int height, float fov, int bounces, int samplesPerPixel) : filename(filename), width(width), height(height), fov(fov), bounces(bounces), samplesPerPixel(samplesPerPixel) {}
+Scene::Scene(const char* filename, int width, int height, int threads, float fov, int bounces, int samplesPerPixel) : filename(filename), width(width), height(height), threads(threads), fov(fov), bounces(bounces), samplesPerPixel(samplesPerPixel) {}
 
 std::ofstream createFile(const char* filename, int width, int height) {
     std::ofstream imageFile(filename);
@@ -15,8 +15,8 @@ std::ofstream createFile(const char* filename, int width, int height) {
     imageFile << "255" << std::endl;
     return imageFile;
 }
-void writePixel(std::ofstream& imageFile, int r, int g, int b) {
-    imageFile << r << " " << g << " " << b << std::endl;
+void writePixel(std::ofstream& imageFile, std::array<float, 3> color) {
+    imageFile << color[0] * 255.0 << " " << color[1] * 255.0 << " " << color[2] * 255.0 << std::endl;
 }
 
 std::vector<Sphere> loadSpheres() {
@@ -44,8 +44,6 @@ std::vector<Sphere> loadSpheres() {
 }
 
 void Scene::renderScene() {
-
-    std::ofstream imageFile = createFile(filename, width, height);
     
     std::vector<Sphere> spheres = loadSpheres();
 
@@ -59,7 +57,19 @@ void Scene::renderScene() {
     float ratio = (float)height / (float)width;
     float fovRadians = fov * M_PI / 180;
 
+    std::vector<std::vector<std::array<float, 3>>> image;
     for(int i = 0; i < height; ++i) {
+        std::vector<std::array<float, 3>> row;
+        for(int j = 0; j < width; ++j) {
+            std::array<float, 3> color_storage;
+            color_storage.fill(0);
+            row.push_back(color_storage);
+        }
+        image.push_back(row);
+    }
+
+    for(int i = 0; i < height; ++i) {
+
         for(int j = 0; j < width; ++j) {
             float x = sin((((float)j / (float)width - 0.5)) * fovRadians);
             float y = sin(((float)i / (float)height - 0.5) * ratio * fovRadians);
@@ -92,12 +102,22 @@ void Scene::renderScene() {
             // int g = j*256/width;
             // int b = 255;
 
-            int r = totalColor[0] * 255.0;
-            int g = totalColor[1] * 255.0;
-            int b = totalColor[2] * 255.0;
+            float r = totalColor[0];
+            float g = totalColor[1];
+            float b = totalColor[2];
 
-            writePixel(imageFile, r, g, b);
+            image[i][j][0] = r;
+            image[i][j][1] = g;
+            image[i][j][2] = b;
+
         }
     }
+    std::ofstream imageFile = createFile(filename, width, height);
+    for(int i = 0; i < height; ++i) {
+        for(int j = 0; j < width; ++j) {
+            writePixel(imageFile, image[i][j]);
+        }
+    }
+        
     imageFile.close();
 }

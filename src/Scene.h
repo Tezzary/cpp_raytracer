@@ -9,9 +9,10 @@ class Scene {
         const char* filename;
         int width;
         int height;
+        int threads;
         float fov;
         int bounces;
         int samplesPerPixel;
-        Scene(const char* filename, int width, int height, float fov, int bounces, int samplesPerPixel);
+        Scene(const char* filename, int width, int height, int threads, float fov, int bounces, int samplesPerPixel);
         void renderScene();
 };
