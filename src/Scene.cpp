@@ -26,9 +26,18 @@ std::vector<Sphere> loadSpheres() {
         Sphere sphere = Sphere(8, {(float)(-36 + i * 18), 0, 0}, {1, 0, i/5.0f}, 0, 0);
         spheres.push_back(sphere);
     }
-    Sphere sphere = Sphere(1000, {0, 1008, 10}, {0.5, 0.5, 0}, 0, 0);
+    //ground
+    Sphere sphere = Sphere(1000, {0, 1008, 10}, {1, 1, 1}, 0, 0);
     spheres.push_back(sphere);
+
+    //light behind balls
     sphere = Sphere(50, {-50, -25, 100}, {1, 1, 1}, 3, 0);
+    spheres.push_back(sphere);
+    //light near balls
+    sphere = Sphere(3, {-20, 5, -12}, {1, 1, 1}, 1, 0);
+    spheres.push_back(sphere);
+    //light behind camera
+    sphere = Sphere(50, {-50, -25, -110}, {1, 1, 1}, 0.7, 0);
     spheres.push_back(sphere);
 
     return spheres;
@@ -37,12 +46,8 @@ std::vector<Sphere> loadSpheres() {
 void Scene::renderScene() {
 
     std::ofstream imageFile = createFile(filename, width, height);
-
-    float ratio = (float)height / (float)width;
-
+    
     std::vector<Sphere> spheres = loadSpheres();
-
-    float scale = tan(fov * M_PI / 180 / 2);
 
     std::mt19937 gen(123); 
     //random seed
@@ -51,10 +56,13 @@ void Scene::renderScene() {
 
     std::normal_distribution<> disribution(0, 1);
 
+    float ratio = (float)height / (float)width;
+    float fovRadians = fov * M_PI / 180;
+
     for(int i = 0; i < height; ++i) {
         for(int j = 0; j < width; ++j) {
-            float x = sin(2 * ((float)j / (float)width - 0.5) * scale);
-            float y = sin(2 * ((float)i / (float)height - 0.5) * ratio * scale);
+            float x = sin((((float)j / (float)width - 0.5)) * fovRadians);
+            float y = sin(((float)i / (float)height - 0.5) * ratio * fovRadians);
             float z = 1;
 
             std::array<float, 3> totalColor;
