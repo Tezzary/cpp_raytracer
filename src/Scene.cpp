@@ -100,11 +100,6 @@ void Scene::deployChunk(int chunkI, int chunkJ, std::vector<std::vector<std::arr
     }
 }
 
-struct ThreadJob {
-    std::thread thread;
-    std::atomic<bool> done = false;
-};
-
 void Scene::renderScene() {
 
     float ratio = (float)height / (float)width;
@@ -130,37 +125,28 @@ void Scene::renderScene() {
     int chunksHeight = height / CHUNK_SIZE;
     int chunksWidth = width / CHUNK_SIZE;
     
-    std::vector<ThreadJob> threads;
-    std::vector<bool> flags;
-    for(int i = 0; i < chunksHeight; ++i) {
-        for(int j = 0; j < chunksWidth; ++j) {
-            while(true) {
-                for(int k = (int)threads.size()-1; k >= 0; --k) {
-                    ThreadJob& t = threads[k];
-                    if(t.done) {
-                        t.thread.join();
-                        threads.erase(threads.begin() + k);
-                    }
-                }
-                if(threads.size() < THREADS) {
-                    ThreadJob thread;
-                    thread.done = false;
-                    thread.thread = std::thread([this, i, j, &image, ratio, &thread]() {
-                        this->deployChunk(i, j, image, ratio);
-                        thread.done = true;
-                    });
-                    threads.push_back(std::move(thread));
-                    break;
-                }
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            }
+    std::vector<std::thread> threads;
+    std::atomic<int> index{0};
+    auto worker = [&]() {
+        while(true) {
+            int i = index;
+            index++;
+            if(i >= chunksWidth * chunksHeight)
+                break;
+            std::cout << "i " << i/chunksWidth << std::endl;
+            std::cout << "j " << i%chunksWidth << std::endl;
+            deployChunk(i/chunksWidth, i%chunksWidth, image, ratio);
         }
+    };
+
+
+    for(int i = 0; i < THREADS; ++i) {
+        threads.emplace_back(worker);
     }
 
-    for(int i = 0; i < (int)threads.size(); ++i) {
+    for(int i = 0; i < THREADS; ++i) {
         threads[i].join();
     }
-
     #endif
 
     std::ofstream imageFile = createFile(filename, width, height);

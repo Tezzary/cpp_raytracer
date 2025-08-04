@@ -5,7 +5,7 @@ const int WIDTH = 800;
 const int HEIGHT = 600;
 const float FOV = 100; // degrees
 const int BOUNCES = 5;
-const int SAMPLESPERPIXEL = 200;
+const int SAMPLESPERPIXEL = 4096;
 const char* FILENAME = "output.ppm";
 
 int main() {
