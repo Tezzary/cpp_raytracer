@@ -133,8 +133,6 @@ void Scene::renderScene() {
             index++;
             if(i >= chunksWidth * chunksHeight)
                 break;
-            std::cout << "i " << i/chunksWidth << std::endl;
-            std::cout << "j " << i%chunksWidth << std::endl;
             deployChunk(i/chunksWidth, i%chunksWidth, image, ratio);
         }
     };
